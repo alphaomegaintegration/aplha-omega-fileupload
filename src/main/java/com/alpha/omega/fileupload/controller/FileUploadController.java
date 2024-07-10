@@ -13,23 +13,23 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/api/v1/file")
+@RestController
 public class FileUploadController {
 	
 	@Autowired
 	private FileServiceImpl fileService;
 	
-	@PostMapping("/upload")
+	@PostMapping("api/v1/file/upload")
 	public ResponseEntity<ConvertedFileDTO> uploadFile(@RequestBody FileDTO fileDTO) {
 		return ResponseEntity.ok(fileService.uploadFile(fileDTO));
 	}
 
-	@GetMapping("/{fileName}/base64")
+	@GetMapping("api/v1/file/{fileName}/base64")
 	public ResponseEntity<String> getFileInBase64(@PathVariable("fileName") String fileName) {
 		return ResponseEntity.ok(fileService.getFileInBase64(fileName));
 	}
 
-	@GetMapping("/{fileName}/download")
+	@GetMapping("api/v1/file/{fileName}/download")
 	public ResponseEntity<Resource> downloadFile(@PathVariable("fileName") String fileName) {
 		byte[] content = fileService.getFileAsBytes(fileName);
 		return ResponseEntity.ok()
