@@ -1,0 +1,107 @@
+version: '3.8'
+services:
+
+#  aplha-omega-fileupload:
+#    image: "127418365645.dkr.ecr.us-east-1.amazonaws.com/aplha-omega-fileupload:latest"
+#    ports:
+#      - "8081:8081"
+#
+#    env_file:
+#      - local.env
+#
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+#      - SERVER_PORT=8081
+#      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+#      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+#
+#    networks:
+#      node_net:
+#        ipv4_address: 172.28.1.91
+
+  postgres:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./dump:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: ${KC_DB_USERNAME}
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD}
+    networks:
+      node_net:
+        ipv4_address: 172.28.1.31
+
+  postgres2:
+    image: postgres
+    volumes:
+      - postgres_data2:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: batch
+      POSTGRES_USER: batchuser
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+    networks:
+      node_net:
+        ipv4_address: 172.28.1.32
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.6
+    command: start #--import-realm
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT_BACKCHANNEL: false
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HEALTH_ENABLED: true
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://172.28.1.31/keycloak
+      KC_DB_USERNAME: ${KC_DB_USERNAME}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+    ports:
+      - 8080:8080
+    volumes:
+      - ./realms:/opt/keycloak/data/import
+    restart: always
+    depends_on:
+      - postgres
+    networks:
+      node_net:
+        ipv4_address: 172.28.1.90
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    #command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    command: redis-server /usr/local/etc/redis/redis.conf --loglevel verbose --save 20 1
+    volumes:
+      - cache:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - $PWD/redis-data:/var/lib/redis
+
+    networks:
+      node_net:
+        ipv4_address: 172.28.1.79
+
+volumes:
+  cache:
+    driver: local
+  postgres_data:
+    driver: local
+  postgres_data2:
+    driver: local
+  postgres_data3:
+    driver: local
+
+networks:
+  node_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

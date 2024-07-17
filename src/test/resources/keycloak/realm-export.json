@@ -1,0 +1,21 @@
+{"users": [
+  {
+    "username": "admin",
+    "email": "jaq1973@gmail.com",
+    "firstName": "Junaid",
+    "lastName": "Qureshi",
+    "enabled": true,
+    "credentials": [
+      {
+        "type": "password",
+        "value": "admin"
+      }
+    ],
+    "clientRoles": {
+      "account": [
+        "api-client"
+      ]
+    }
+  }
+]
+}

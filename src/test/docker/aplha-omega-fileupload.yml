@@ -1,0 +1,25 @@
+version: "3.3"
+services:
+  authentication:
+    image: "127418365645.dkr.ecr.us-east-1.amazonaws.com/aplha-omega-fileupload:latest"
+    ports:
+      - "8081:8081"
+
+    env_file:
+      - local.env
+
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SERVER_PORT=8081
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+#      - KEYCLOAK_ADMIN_CLIENT_SECRET=${KEYCLOAK_ADMIN_CLIENT_SECRET}
+
+    networks:
+      node_net:
+        ipv4_address: 172.28.1.91
+
+networks:
+  node_net:
+    external:
+      name: docker_node_net
